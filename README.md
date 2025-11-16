@@ -43,4 +43,15 @@ This is a fun yet technically solid project showing backend development, API des
 ---
 
 ## 🗂 Project Structure
+src/main/java
+└── com.example.demo.anime
+├── controller
+├── dto
+├── entity
+├── repository
+├── service
+└── util
 
+src/main/resources
+└── static
+└── index.html (frontend UI)
