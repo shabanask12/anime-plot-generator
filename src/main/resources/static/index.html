@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Anime Plot Generator — Aesthetic UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg1:#0f172a;
+            --bg2:#271b6a;
+            --accent1:#ff6a00;
+            --accent2:#ee0979;
+            --glass: rgba(255,255,255,0.08);
+            --muted: rgba(255,255,255,0.72);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;padding:0;font-family:'Poppins',sans-serif;
+            background: radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,0.03), transparent),
+            linear-gradient(135deg,var(--bg2) 0%, var(--bg1) 60%);
+            color:#fff;min-height:100vh;overflow:hidden;
+            display:flex;align-items:center;justify-content:center;padding:40px;
+        }
+
+        /* floating petals */
+        .petals{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+        .petal{position:absolute;width:36px;height:36px;background:radial-gradient(circle at 30% 30%, #fff6, #ff8ab4);
+            border-radius:60% 40% 70% 30% / 50% 60% 40% 50%;opacity:0.9;transform:rotate(15deg);animation:fall 8s linear infinite}
+        .petal:nth-child(1){left:10%;animation-delay:0s;animation-duration:9s}
+        .petal:nth-child(2){left:30%;animation-delay:1.2s;animation-duration:10s}
+        .petal:nth-child(3){left:50%;animation-delay:0.6s;animation-duration:8s}
+        .petal:nth-child(4){left:70%;animation-delay:2s;animation-duration:11s}
+        .petal:nth-child(5){left:85%;animation-delay:1s;animation-duration:9.5s}
+        @keyframes fall{0%{transform:translateY(-120vh) rotate(0deg) scale(.8);opacity:0}
+            20%{opacity:1}
+            100%{transform:translateY(120vh) rotate(720deg) scale(1.1);opacity:0}}
+
+        /* card */
+        .card{width:1100px;max-width:100%;display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
+        .side{background:var(--glass);backdrop-filter:blur(8px);padding:22px;border-radius:16px;box-shadow:0 8px 30px rgba(2,6,23,.6)}
+        .main{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));padding:20px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.6);min-height:520px;overflow:auto}
+
+        h1{margin:0 0 10px;font-size:1.6rem;letter-spacing:0.6px}
+        p.lead{color:var(--muted);margin:0 0 18px}
+        label{display:block;font-weight:600;margin:12px 0 6px}
+        input,select,textarea{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));color:#fff}
+        textarea{min-height:90px;resize:vertical}
+
+        .btn-row{display:flex;gap:10px;margin-top:12px}
+        .btn{flex:1;padding:12px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+        .btn.generate{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;box-shadow:0 10px 30px rgba(238,9,121,0.18);}
+        .btn.save{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--muted)}
+
+        /* output styling */
+        .title-row{display:flex;align-items:center;gap:12px}
+        .title-badge{width:48px;height:48px;border-radius:10px;background:linear-gradient(180deg,#fff2,rgba(255,255,255,0.03));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+        .meta{display:flex;gap:10px;align-items:center;margin-top:8px}
+        .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.04);font-weight:600}
+
+        .synopsis{margin-top:12px;color:#f1f6ff;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:10px}
+
+        .episodes{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+        .ep{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+        .ep h4{margin:0 0 8px;font-size:0.95rem}
+        .ep p{margin:0;color:rgba(255,255,255,0.8);font-size:0.9rem}
+
+        .small{font-size:0.85rem;color:var(--muted)}
+
+        /* animations */
+        .pulse{animation:pulse 2.4s infinite}
+        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,106,0,0.3)}50%{box-shadow:0 0 60px 8px rgba(255,106,0,0.02)}100%{box-shadow:0 0 0 0 rgba(255,106,0,0)}}
+
+        /* responsive */
+        @media (max-width:980px){.card{grid-template-columns:1fr;}.side{order:2}.main{order:1}}
+
+        /* footer */
+        .footer{margin-top:12px;color:var(--muted);font-size:0.9rem;display:flex;justify-content:space-between;align-items:center}
+    </style>
+</head>
+<body>
+<div class="petals" aria-hidden>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+</div>
+
+<div class="card" role="main" aria-live="polite">
+    <div class="side">
+        <h1>✨ Anime Plot Studio</h1>
+        <p class="lead">Generate character-driven anime plots instantly. Tweak tone, genre and keywords for different vibes.</p>
+
+        <label for="name">Protagonist</label>
+        <input id="name" placeholder="Airi" />
+
+        <label for="genre">Genre</label>
+        <select id="genre">
+            <option>fantasy</option>
+            <option>slice-of-life</option>
+            <option>romance</option>
+            <option>mystery</option>
+            <option>action</option>
+            <option>sci-fi</option>
+        </select>
+
+        <label for="tone">Tone</label>
+        <select id="tone">
+            <option>melancholic</option>
+            <option>wholesome</option>
+            <option>dark</option>
+            <option>dramatic</option>
+            <option>comedic</option>
+        </select>
+
+        <label for="keywords">Keywords</label>
+        <input id="keywords" placeholder="music, rain" />
+
+        <div class="btn-row">
+            <button class="btn generate pulse" id="genBtn">⚡ Generate</button>
+            <button class="btn save" id="saveBtn">💾 Save</button>
+        </div>
+
+        <div class="footer">
+            <div class="small">Seed: <span id="seedLabel">—</span></div>
+            <div class="small">Status: <span id="status">idle</span></div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div id="outputArea">
+            <div class="title-row">
+                <div class="title-badge">AP</div>
+                <div>
+                    <h2 id="outTitle">Your generated title will appear here</h2>
+                    <div class="meta">
+                        <div class="chip" id="outGenre">genre</div>
+                        <div class="chip" id="outTone">tone</div>
+                        <div class="chip" id="outId">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="synopsis" id="outSynopsis">Synopsis will be shown here after generation. It’s cozy and cinematic.</div>
+
+            <div style="display:flex;gap:12px;margin-top:12px;align-items:center;">
+                <button id="downloadJson" class="btn save">⬇️ Download JSON</button>
+                <button id="copyBtn" class="btn save">📋 Copy JSON</button>
+                <button id="shareBtn" class="btn save">🔗 Copy Link</button>
+            </div>
+
+            <h3 style="margin-top:18px;margin-bottom:8px">Episodes</h3>
+            <div class="episodes" id="episodes"></div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Utilities & DOM references ---
+    function uid(){return 'id-' + Math.random().toString(36).slice(2,11)}
+
+    const nameEl = document.getElementById('name')
+    const genreEl = document.getElementById('genre')
+    const toneEl = document.getElementById('tone')
+    const keywordsEl = document.getElementById('keywords')
+    const genBtn = document.getElementById('genBtn')
+    const saveBtn = document.getElementById('saveBtn')
+    const outTitle = document.getElementById('outTitle')
+    const outSynopsis = document.getElementById('outSynopsis')
+    const outGenre = document.getElementById('outGenre')
+    const outTone = document.getElementById('outTone')
+    const outId = document.getElementById('outId')
+    const episodesEl = document.getElementById('episodes')
+    const seedLabel = document.getElementById('seedLabel')
+    const status = document.getElementById('status')
+    const downloadBtn = document.getElementById('downloadJson')
+    const copyBtn = document.getElementById('copyBtn')
+    const shareBtn = document.getElementById('shareBtn')
+
+    let lastPayload = null
+    let lastResponse = null
+
+    // --- Generate (renamed to avoid collisions) ---
+    async function generatePlot(){
+        status.textContent = 'generating...'
+        genBtn.disabled = true
+        genBtn.textContent = '⏳ Generating'
+
+        const payload = {
+            protagonistName: nameEl.value || null,
+            genre: genreEl.value,
+            tone: toneEl.value,
+            keywords: keywordsEl.value ? keywordsEl.value.split(',').map(s=>s.trim()).filter(Boolean) : [],
+            length: 'short',
+            seed: Math.floor(Math.random()*1000000)
+        }
+        seedLabel.textContent = payload.seed
+
+        try{
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            if(!res.ok){
+                const text = await res.text().catch(()=>null)
+                throw new Error('server error: ' + (text || res.status))
+            }
+            const data = await res.json()
+            lastPayload = payload
+            lastResponse = data
+            renderOutput(data)
+            status.textContent = 'done'
+        }catch(err){
+            status.textContent = 'error'
+            console.error('generatePlot error:', err)
+            alert('Failed to generate: ' + (err && err.message ? err.message : String(err)))
+        }finally{
+            genBtn.disabled = false
+            genBtn.textContent = '⚡ Generate'
+        }
+    }
+
+    // --- Render output robustly ---
+    function renderOutput(data){
+        if(!data){
+            console.warn('renderOutput: no data')
+            return
+        }
+
+        outTitle.textContent = data.title || data.name || '—'
+        outSynopsis.textContent = data.synopsis || data.summary || '—'
+        outGenre.textContent = data.genre || genreEl.value || '—'
+        outTone.textContent = data.tone || toneEl.value || '—'
+        outId.textContent = data.id || data.uuid || '—'
+
+        // Normalize episodes array from different possible shapes
+        let eps = []
+        if (Array.isArray(data.episodes)) eps = data.episodes
+        else if (Array.isArray(data.ep)) eps = data.ep
+        else if (data.story && Array.isArray(data.story.episodes)) eps = data.story.episodes
+        else if (data.items && Array.isArray(data.items)) eps = data.items
+        else {
+            for (const k in data) {
+                if (Array.isArray(data[k]) && data[k].length && typeof data[k][0] === 'object') {
+                    eps = data[k]
+                    break
+                }
+            }
+        }
+
+        episodesEl.innerHTML = ''
+
+        if (!eps || eps.length === 0) {
+            const placeholder = document.createElement('div')
+            placeholder.className = 'small'
+            placeholder.textContent = 'No episodes generated yet.'
+            episodesEl.appendChild(placeholder)
+            console.info('renderOutput: episodes empty or not found', data)
+            return
+        }
+
+        eps.forEach((ep, idx) => {
+            const epIndex = ep.ep || ep.number || (idx + 1)
+            const epTitle = ep.title || ep.name || `Episode ${epIndex}`
+            const epSummary = ep.summary || ep.desc || ep.description || ep.text || 'No summary.'
+
+            const div = document.createElement('div')
+            div.className = 'ep'
+            const h = document.createElement('h4')
+            h.textContent = `Ep ${epIndex}: ${epTitle}`
+            const p = document.createElement('p')
+            p.textContent = epSummary
+
+            div.appendChild(h)
+            div.appendChild(p)
+            episodesEl.appendChild(div)
+        })
+    }
+
+    // --- Download / copy / share handlers ---
+    function downloadJSON(){
+        if(!lastResponse) return alert('Nothing to download')
+        const blob = new Blob([JSON.stringify(lastResponse,null,2)],{type:'application/json'})
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a'); a.href = url; a.download = (lastResponse.title||'plot')+'.json'; a.click(); URL.revokeObjectURL(url)
+    }
+
+    function copyJSON(){
+        if(!lastResponse) return alert('Nothing to copy')
+        navigator.clipboard.writeText(JSON.stringify(lastResponse,null,2)).then(()=>alert('Copied JSON to clipboard')).catch(()=>alert('Copy failed'))
+    }
+
+    function copyLink(){
+        if(!lastResponse || !lastResponse.id) return alert('Save first to get a share link')
+        const link = location.origin + '/plots/' + lastResponse.id
+        navigator.clipboard.writeText(link).then(()=>alert('Link copied: '+link)).catch(()=>alert('Copy failed'))
+    }
+
+    // --- Save to server (re-POST to ensure saved) ---
+    async function saveToServer(){
+        if(!lastResponse && !lastPayload) return alert('Generate first')
+        // If we have an id, try to GET first to avoid duplicate
+        if(lastResponse && lastResponse.id){
+            try{
+                const check = await fetch('/api/plots/' + lastResponse.id)
+                if(check.ok){
+                    alert('Already saved on server (exists)')
+                    return
+                }
+            }catch(e){}
+        }
+
+        try{
+            // Use lastPayload (the generation input) to re-POST and persist
+            const payload = lastPayload || {
+                protagonistName: nameEl.value || null,
+                genre: genreEl.value,
+                tone: toneEl.value,
+                keywords: keywordsEl.value ? keywordsEl.value.split(',').map(s=>s.trim()).filter(Boolean) : [],
+                length: 'short',
+                seed: Math.floor(Math.random()*1000000)
+            }
+            const res = await fetch('/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+            if(!res.ok) throw new Error('save failed')
+            const saved = await res.json()
+            lastResponse = saved
+            outId.textContent = saved.id
+            alert('Saved to server')
+        }catch(err){
+            console.error('saveToServer error', err)
+            alert('Save error: ' + (err && err.message ? err.message : String(err)))
+        }
+    }
+
+    // --- Wire events safely ---
+    genBtn.addEventListener('click', generatePlot)
+    downloadBtn.addEventListener('click', downloadJSON)
+    copyBtn.addEventListener('click', copyJSON)
+    shareBtn.addEventListener('click', copyLink)
+    saveBtn.addEventListener('click', saveToServer)
+
+    // keyboard shortcut: ctrl+enter generate
+    window.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generatePlot()
+    })
+
+    // check URL for ?id= and load plot if present
+    function checkUrl() {
+        try {
+            const p = new URLSearchParams(location.search)
+            const id = p.get('id')
+            if (!id) return
+            fetch('/api/plots/' + id)
+                .then(r => {
+                    if (!r.ok) throw new Error('not found')
+                    return r.json()
+                })
+                .then(data => {
+                    lastResponse = data
+                    renderOutput(data)
+                    seedLabel.textContent = data.seed || seedLabel.textContent
+                    status.textContent = 'loaded'
+                })
+                .catch(()=>{})
+        } catch (err) {
+            console.warn('checkUrl error', err)
+        }
+    }
+
+    // run once on load
+    checkUrl()
+
+    // expose a safe debug helper (non-conflicting)
+    window.__animePlotDebug = () => ({ lastPayload, lastResponse })
+</script>
+</body>
+</html>
